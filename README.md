@@ -9,7 +9,7 @@ Simple CLI tool to check for coveted camping spots. You can finish the booking m
 
 Just run
 
-`campsite-checker <campsiteId> <date> [siteId] [wait]`
+`node index.js <campsiteId> <date> [siteId] [wait]`
 
 Parameters:
 
