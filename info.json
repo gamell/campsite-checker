@@ -1,0 +1,10 @@
+{
+  "campsiteId": 232491,
+  "startDate": "2019-05-27",
+  "length": 2,
+  "siteId": "001",
+  "login" : {
+    "email": "your@email",
+    "password": "*********"
+  }
+}
