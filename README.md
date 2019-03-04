@@ -3,11 +3,11 @@ Simple CLI tool to check for coveted camping spots. You can finish the booking m
 
 # Usage
 
-First run `npm install`
+Run `npm install`
 
-Then:
+Configure the script by filling the `config.json` file
 
-`node index.js <campsiteId> <date> [siteId] [wait]`
+Then just `node index.js`
 
 Parameters:
 
