@@ -1,11 +1,11 @@
 {
-  "campsiteId": 232491,
-  "campsiteId-yosemite": 232447,
-  "startDate": "2019-06-04",
-  "length": 2,
-  "siteId": "3",
-  "login" : {
-    "email": "your@email",
-    "password": "*********"
-  }
+    "campsiteId": 232491,
+    "campsiteId-yosemite": 232447,
+    "startDate": "2019-06-04",
+    "length": 2,
+    "siteId": 3,
+    "login": {
+        "email": "your@email",
+        "password": "*********"
+    }
 }

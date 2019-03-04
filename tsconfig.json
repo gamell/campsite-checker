@@ -3,8 +3,9 @@
       "outDir": "./built",
       "allowJs": true,
       "target": "ES2017",
+      "module": "CommonJS",
       "noImplicitReturns": true,
-      "noFallthroughCasesInSwitch": true, 
+      "noFallthroughCasesInSwitch": true,
   },
   "include": [
       "./src/**/*"
