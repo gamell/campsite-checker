@@ -14,6 +14,12 @@ exports.getSiteAvailableHandle = (sitesSelector, siteId, tablePadding) => {
     return elem.innerText === 'A' ? elem : undefined;
 };
 
+exports.getEndDayHandle = (selector, id, column) => {
+    const $sites = Array.from(document.querySelectorAll(selector));
+    const $site = $sites.filter(s => s.innerText.indexOf(id) > -1)[0];
+    return $site.parentNode.parentNode.childNodes[column];
+};
+
 exports.getSiteRows = sel => Array.from(document.querySelectorAll(sel)).length;
 
 exports.siteRowsLargerThan = (sel, initialRows) => {
@@ -27,7 +33,7 @@ exports.getCloseOverlayButton = selector => {
 };
 
 exports.waitForUrlToContain = str => {
-    const href = document.location.href;
+    const { href } = document.location;
     return href.indexOf(str) > -1;
 };
 

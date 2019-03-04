@@ -2,6 +2,7 @@ const moment = require('moment');
 const {
     waitForUrlToContain,
     getSiteAvailableHandle,
+    getEndDayHandle,
     getCloseOverlayButton,
     getTextFromSelector,
     checkIfSiteInView,
@@ -160,15 +161,7 @@ export default async function run(page, info) {
         if (lengthOfStay > 1) {
             const tableColumn = tablePadding + lengthOfStay;
             const endDayHandle = await page.evaluateHandle(
-                (selector, siteId, column) => {
-                    const $sites = Array.from(
-                        document.querySelectorAll(selector)
-                    );
-                    const $site = $sites.filter(
-                        s => s.innerText.indexOf(siteId) > -1
-                    )[0];
-                    return $site.parentNode.parentNode.childNodes[column];
-                },
+                getEndDayHandle,
                 sel.sites,
                 siteId,
                 tableColumn
@@ -199,7 +192,7 @@ export default async function run(page, info) {
         console.log(`Starting parseBookableTime`);
         const text = await page.evaluate(
             getTextFromSelector,
-            bookingErrorMessage
+            sel.bookingErrorMessage
         );
         return parseTime(text); // returns moment object
     }
