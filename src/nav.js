@@ -176,7 +176,7 @@ exports.run = async function run(page, info) {
   }
 
   async function waitUntilSetupTime() {
-    await page.screenshot({path: 'screenshots/waitUntilSetupTime.png'});
+    await page.screenshot({path: '../screenshots/waitUntilSetupTime.png'});
     const setupTime = bookableTime.clone().subtract(MINUTES_TO_GET_READY, 'minutes');
     console.log(`\n\n*** setupTime = ${setupTime.format()}\n\n`);
     while(setupTime.isBefore(moment())) {
@@ -187,7 +187,7 @@ exports.run = async function run(page, info) {
   }
 
   async function waitUntilBookableTimeAndBook() {
-    await page.screenshot({path: 'screenshots/waitUntilBookableTimeAndBook.png'});
+    await page.screenshot({path: '../screenshots/waitUntilBookableTimeAndBook.png'});
     const clickBookNowTime = bookableTime.clone().subtract(25, 'ms');
     console.log(`\n\n*** clickBookNowTime = ${bookableTime.format('HH:mm:ss:sss')}\n\n`);
     while(moment().isBefore(clickBookNowTime));
@@ -206,7 +206,7 @@ exports.run = async function run(page, info) {
     await selectTrip({ clickBookNow: false });
     await waitUntilBookableTimeAndBook();
     await checkIfInCheckout();
-    await page.screenshot({path: 'screenshots/kaching.png'});
+    await page.screenshot({path: '../screenshots/kaching.png'});
   } catch (e) {
     logError(e);
   }

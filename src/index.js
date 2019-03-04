@@ -1,9 +1,9 @@
 const puppeteer = require('puppeteer');
-let userConfig = require('./config.json');
+let userConfig = require('../config.json');
 const nav = require('./nav');
 
 try {
-  const hiddenLoginInfo = require('./.login');
+  const hiddenLoginInfo = require('../.login');
   // we overwrite the login info with the one in the hidden file
   userConfig = { ...userConfig, login: hiddenLoginInfo };
 } catch (e) {}
