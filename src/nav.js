@@ -1,6 +1,5 @@
 const moment = require('moment');
 const {
-    waitForUrlToContain,
     getSiteAvailableHandle,
     getEndDayHandle,
     getCloseOverlayButton,
@@ -179,12 +178,9 @@ export default async function run(page, info) {
         if (maybeError) {
             console.log(`Gotten here because of this error: ${maybeError}`);
         }
-        await page.waitForFunction(
-            waitForUrlToContain,
-            'reservations/orderdetails'
-        );
         await page.waitFor(sel.checkoutPage);
         console.log(`SUCCESS!! - You have 15 mins to check out`);
+        await page.screenshot({ path: './screenshots/kaching.png' });
         kaChing();
     }
 
@@ -236,7 +232,7 @@ export default async function run(page, info) {
 
     async function waitUntilSetupTime() {
         await page.screenshot({
-            path: '../screenshots/waitUntilSetupTime.png'
+            path: './screenshots/waitUntilSetupTime.png'
         });
         const setupTime = bookableTime
             .clone()
@@ -257,7 +253,7 @@ export default async function run(page, info) {
 
     async function waitUntilBookableTimeAndBook() {
         await page.screenshot({
-            path: '../screenshots/waitUntilBookableTimeAndBook.png'
+            path: './screenshots/waitUntilBookableTimeAndBook.png'
         });
         const clickBookNowTime = bookableTime.clone().subtract(25, 'ms');
         console.log(
@@ -285,7 +281,6 @@ export default async function run(page, info) {
         await selectTrip({ clickBookNow: false });
         await waitUntilBookableTimeAndBook();
         await checkIfInCheckout();
-        await page.screenshot({ path: '../screenshots/kaching.png' });
     } catch (e) {
         logError(e);
     }

@@ -14,7 +14,7 @@ exports.calculateDateString = dateInput => {
 };
 
 // Jackpot!
-exports.kaChing = () => player.play('../../ka-ching.mp3');
+exports.kaChing = () => player.play('./ka-ching.mp3');
 
 exports.tryAfter = (ms, callback) =>
     new Promise(resolve =>
