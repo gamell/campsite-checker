@@ -10,12 +10,14 @@ const {
 } = require('./lib/browser');
 
 const {
-    tryAfter,
+    callLater: tryAfter,
     calculateDateString,
     kaChing,
     logError,
     parseTime,
-    sleep
+    sleep,
+    moveMouseRandomlyFor,
+    humanType
 } = require('./lib/util');
 
 const sel = require('./lib/selectors');
@@ -35,8 +37,9 @@ export default async function run(page, info) {
     const { campsiteId, startDate, length: lengthOfStay, siteId } = info;
     const startDateString = calculateDateString(startDate);
 
-    async function login() {
+    async function maybeLogin() {
         await page.goto('https://www.recreation.gov/account/profile');
+        await moveMouseRandomlyFor(page, 3000);
         const loginInfo = info.login;
         if (!loginInfo.email || !loginInfo.password) {
             console.log(
@@ -44,19 +47,23 @@ export default async function run(page, info) {
             );
             return;
         }
-        const { email, password } = loginInfo;
-        await page.waitFor(sel.loginEmail, { timeout: 5000 });
-        await page.type(sel.loginEmail, email, { delay: 50 });
-        await page.type(sel.loginPassword, password, { delay: 50 });
-        await page.click(sel.loginButton);
         try {
-            // wait until in profile page
-            await page.waitFor(sel.accountPage);
-            console.log('Successfully logged in!');
+            const { email, password } = loginInfo;
+            await page.waitFor(sel.loginEmail, { timeout: 3000 });
+            await humanType(page, sel.loginEmail, email);
+            await humanType(page, sel.loginPassword, password);
+            await page.click(sel.loginButton);
+            try {
+                // wait until in profile page
+                await page.waitFor(sel.accountPage);
+                console.log('Successfully logged in!');
+            } catch (e) {
+                throw new Error(
+                    'Seems that we were not redirected to the profile page, something went wrong.'
+                );
+            }
         } catch (e) {
-            throw new Error(
-                'Seems that we were not redirected to the profile page, something went wrong.'
-            );
+            // nothing to do, we're simply already logged in
         }
     }
 
@@ -67,25 +74,32 @@ export default async function run(page, info) {
         const availabilityUrl = `https://www.recreation.gov/camping/campgrounds/${campsiteId}/availability`;
         await page.goto(availabilityUrl);
         await page.waitFor(sel.datePicker);
+        await moveMouseRandomlyFor(page, 1000);
         await page.focus(sel.datePicker);
-        await page.type(sel.datePicker, '');
-        await page.waitFor(500);
-        await page.type(sel.datePicker, startDateString, { delay: 50 });
+        await page.waitFor(200);
+        for (let i = 0; i < 11; i += 1) {
+            await page.waitFor(50);
+            await page.keyboard.press('Backspace');
+        }
+        await page.waitFor(300);
+        await humanType(page, sel.datePicker, startDateString);
         // somehow the date filter is not applied until blur event
         await page.click(sel.blankSpace);
+        await moveMouseRandomlyFor(page, 500);
         // wait for the loading spinner to go away
         await page.waitForFunction(
             selector => !document.querySelector(selector),
             { polling: 250 },
             sel.loading
         );
+        await moveMouseRandomlyFor(page, 1000);
         // close the pop over if it exists
         const maybeCloseButton = await page.evaluateHandle(
             getCloseOverlayButton,
             sel.popOverCloseButton
         );
         await maybeCloseButton.click();
-        await page.waitFor(250);
+        await moveMouseRandomlyFor(page, 500);
         try {
             let siteInView = await page.evaluate(
                 checkIfSiteInView,
@@ -93,6 +107,7 @@ export default async function run(page, info) {
                 siteId
             );
             while (!siteInView) {
+                await moveMouseRandomlyFor(page, 500);
                 const initialRows = await page.evaluate(getSiteRows, sel.sites);
                 console.log(`Site not in view. Loading more sites...`);
                 await page.click(sel.loadMoreButton);
@@ -103,7 +118,7 @@ export default async function run(page, info) {
                     sel.sites,
                     initialRows
                 );
-                page.waitFor(100);
+                await moveMouseRandomlyFor(page, 200);
                 siteInView = await page.evaluate(
                     checkIfSiteInView,
                     sel.sites,
@@ -128,13 +143,14 @@ export default async function run(page, info) {
 
     async function checkUntilAvailable() {
         let isAvailable = await checkIfAvailable();
+        await moveMouseRandomlyFor(page, 2000);
         while (!isAvailable) {
             console.log(
                 `Campsite not available yet. Trying again in ${WAIT_AVAILABLE /
                     1000 /
                     60} minutes...`
             );
-            isAvailable = await tryAfter(WAIT_AVAILABLE, checkIfAvailable);
+            isAvailable = await tryAfter(checkIfAvailable, WAIT_AVAILABLE);
         }
         return isAvailable;
     }
@@ -154,6 +170,7 @@ export default async function run(page, info) {
     }
 
     async function selectTrip({ clickBookNow } = { clickBookNow: true }) {
+        await moveMouseRandomlyFor(page, 1236);
         console.log(`Starting selectDates with clickBookNow: ${clickBookNow}`);
         if (!lengthOfStay || !startDayHandle) return;
         await startDayHandle.click();
@@ -239,7 +256,8 @@ export default async function run(page, info) {
             .subtract(MINUTES_TO_GET_READY, 'minutes');
         console.log(`\n\n*** setupTime = ${setupTime.format()}\n\n`);
         while (setupTime.isBefore(moment())) {
-            await sleep(1000); // check every 1s
+            await moveMouseRandomlyFor(page, 1000);
+            await sleep(1000); // check every 2s total
             console.log(
                 `Waiting for setupTime: ${moment
                     .duration(setupTime.diff(moment()))
@@ -271,7 +289,7 @@ export default async function run(page, info) {
     }
 
     try {
-        await login();
+        await maybeLogin();
         await checkUntilAvailable(); // blocking until campsite "available"
         await selectTrip({ clickBookNow: true });
         await maybeGetBookableTimeAndAwait(); // blocking until just before the bookableTime

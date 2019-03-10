@@ -16,16 +16,62 @@ exports.calculateDateString = dateInput => {
 // Jackpot!
 exports.kaChing = () => player.play('./ka-ching.mp3');
 
-exports.tryAfter = (ms, callback) =>
+const callLater = (callback, ms) =>
     new Promise(resolve =>
         setTimeout(() => {
             resolve(callback());
         }, ms)
     );
 
-exports.sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+exports.callLater = callLater;
+
+const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+
+exports.sleep = sleep;
 
 exports.logError = e => console.error(`ERROR \n\n ${e}`);
+
+const randBetween = (min, max) =>
+    Math.floor(Math.random() * (max - min + 1) + min);
+
+exports.moveMouseRandomlyFor = async (page, ms) => {
+    const { width, height } = page.viewport();
+    const { mouse } = page;
+    const moveUntil = moment().add(ms, 'ms');
+    let x = randBetween(0, width);
+    let y = randBetween(0, height);
+    const direction = { x: 1, y: 1 };
+    while (moment().isBefore(moveUntil)) {
+        await mouse.move(x, y, { steps: 100 });
+        // Max move only 1% of the width + height each iteration
+        const maxMove = Math.floor((width + height) * 0.01);
+        const moveX = randBetween(0, maxMove);
+        const moveY = randBetween(0, maxMove);
+        const { x: xDir, y: yDir } = direction;
+        x =
+            x + moveX * xDir > width
+                ? (direction.x *= -1) && x - moveX
+                : x + moveX;
+        y =
+            y + moveY * yDir > height
+                ? (direction.y *= -1) && y - moveY
+                : y + moveY;
+    }
+    return true;
+};
+
+/*  eslint-disable no-return-await */
+exports.humanType = async (page, sel, text) => {
+    await page.click(sel);
+    await page.focus(sel);
+    const charArr = text.split('');
+    while (charArr.length > 0) {
+        const char = charArr.shift();
+        await sleep(randBetween(50, 210));
+        await page.keyboard.type(char);
+    }
+};
+/*  eslint-enable no-return-await */
 
 // group [1] will be the time i.e. 10AM
 // group [2] will be the Timezone (might need clipping)
